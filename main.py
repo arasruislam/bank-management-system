@@ -59,7 +59,6 @@ def main():
 
         elif choice == "2":
             admin_email = input("Enter admin email: ")
-            admin_password = input("Enter admin password: ")
             if admin_email == admin.email:
                 while True:
                     print("\n--- Admin Menu ---")
@@ -104,7 +103,3 @@ def main():
 
         else:
             print("Invalid choice. Please try again.")
-
-
-if __name__ == "__main__":
-    main()
