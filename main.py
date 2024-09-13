@@ -1,6 +1,133 @@
-from .bank import Bank
-from .admin import Admin
+class User:
+    def __init__(self, name, email, address, account_type, account_number):
+        self.name = name
+        self.email = email
+        self.address = address
+        self.account_type = account_type
+        self.account_number = account_number
 
+        self.balance = 0
+        self.transaction_history = []
+        self.load_count = 0
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            self.transaction_history.append(f"Deposited: {amount}")
+            print(f"${amount} deposit done. Current balance: ${self.balance}")
+        else:
+            print("deposit amount must be grater then 0")
+
+    def withdraw(self, amount):
+        if amount > self.balance:
+            print("Withdrawal amount exceeded")
+        elif amount <= 0:
+            print("Withdrawal failed")
+        else:
+            self.balance -= amount
+            self.transaction_history.append(f"withdrawn: ${amount}")
+
+    def check_balance(self):
+        print(f"Current Balance: ${self.balance}")
+
+    def show_transaction_history(self):
+        print("Transaction History: ")
+        for transaction in self.transaction_history:
+            print(transaction)
+
+    def take_loan(self, amount, bank):
+        if self.load_count >= 2:
+            print("load limit cross already!")
+            return
+        if bank.load_feature_off:
+            print("currently loan system off")
+            return
+
+        self.balance += amount
+        self.load_count +=1
+        self.transaction_history.append(f"Load Take: ${amount}")
+        bank.total_loan += amount
+        print(f"${amount} loan received. Current balance ${self.balance}")
+
+    def transfer(self, amount, to_account, bank):
+        if amount > self.balance:
+            print("Withdrawal amount exceeded")
+            return
+        recipient = bank.get_user_by_account_number(to_account)
+        if not recipient:
+            print("Account does not exist!")
+            return
+        if amount <=0:
+            print("transfer amount is less then zero.")
+            return
+        self.balance -= amount
+        recipient.balance += amount
+        self.transaction_history.append(f"Transferred: ${amount} to {to_account}")
+        recipient.transaction_history.append(
+            f"Received: ${amount} from {self.account_number}"
+        )
+        
+        print(f"${amount} transfer done to {to_account}. Current balance: ${self.balance}")
+
+class Bank:
+    def __init__(self):
+        self.users = {}
+        self.total_loans = 0
+        self.loan_feature_off = False
+        self.next_account_number = 1000
+        
+    def create_user_account(self, name, email, address, account_type):
+        account_number = self.generate_account_number()
+        user = User(name, email, address, account_type, account_number)
+        self.users[account_number]=user
+        print(f"account created done. Account Number: {user.account_number}")
+        
+    def generate_account_number(self):
+        account_number = self.next_account_number
+        self.next_account_number +=1
+        return account_number
+    
+    def get_user_by_account_number(self, account_number):
+        return self.users.get(account_number, None)
+    
+    def total_balance(self):
+        return sum(user.balance for user in self.users.values())
+    
+
+class Admin:
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+
+    def create_account(self, bank, name, email, address, account_type):
+        user = User(name, email, address, account_type)
+        bank.users[user.account_number] = user
+        print(f"Account created done. Account Number: {user.account_number}")
+
+    def delete_account(self, bank, account_number):
+        if account_number in bank.users:
+            del bank.users[account_number]
+            print(f"Account {account_number} delete done")
+        else:
+            print("Account could not found")
+
+    def view_all_accounts(self, bank):
+        print("All users list: ")
+        for acc_num, user in bank.users.items():
+            print(
+                f"Account Number: {acc_num}, Name: {user.name}, Email: {user.email}, Balance: ${user.balance}"
+            )
+
+    def check_total_balance(self, bank):
+        print(f"Total bank balance: {bank.total_balance()}")
+
+    def check_total_loans(self, bank):
+        print(f"Total loan: ${bank.total_loans}")
+
+    def toggle_loan_feature(self, bank):
+        bank.loan_feature_off = not bank.loan_feature_off
+        status = "off" if bank.loan_feature_off else "on"
+        print("Loan feature {status} now")
 
 def main():
     bank = Bank()
