@@ -226,3 +226,17 @@ def main():
                         admin.check_total_balance(bank)
                     elif admin_choice == "5":
                         admin.check_total_loans(bank
+                    elif admin_choice == "6":
+                        admin.toggle_loan_feature(bank)
+                    elif admin_choice == "7":
+                        print("Admin logged out successfully.")
+                        break
+                    else:
+                        print("Invalid choice. Please try again.")
+            else:
+                print("Incorrect email of password.")
+        elif choice == "3":
+            print("Exited successfully.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
